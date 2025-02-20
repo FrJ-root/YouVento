@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use app\Http\Controllers\PostController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,13 +10,31 @@ use app\Http\Controllers\PostController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\StudentController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/', [PostController::class, 'index'])->name('posts.index');
-Route::get('/create', [PostController::class, 'create'])->name('posts.create');
-Route::post('/', [PostController::class, 'store'])->name('posts.store');
-Route::get('/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
-Route::put('/{post}', [PostController::class, 'update'])->name('posts.update');
-Route::delete('/{post}', [PostController::class, 'destroy'])->name('posts.delete');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+});
+
+Route::middleware(['auth', 'student'])->group(function () {
+    Route::get('/student/dashboard', [StudentController::class, 'index'])->name('student.dashboard');
+});
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
